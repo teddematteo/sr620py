@@ -1,4 +1,4 @@
 from sr620 import *
 
 
-device = SR620('dev/ttyUSB0')
+device = SR620('/dev/ttyUSB0')

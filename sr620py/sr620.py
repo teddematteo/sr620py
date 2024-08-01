@@ -39,9 +39,11 @@ class SR620():
                 raise SR620ReadException("An error occurs while reading from the device",errors={"value":1})
             
     def get_configuration():
+        print('ciao')
 
     def set_configuration(self,mode=3,source=0,jttr=1):
+        print('ciao')
             
     def start_measurement():
-
+        print('ciao')
 
