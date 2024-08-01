@@ -25,12 +25,20 @@ def get_bit(x, i):
     return bit
 
 def progress(tot,p):
+    print('-------------------------------------')
     print('Measuring...')
     for j in tqdm(range(tot)):
         time.sleep(p)
-    print('Measure completed!...')
+    print('Measurement completed!...')
+    print('-------------------------------------')
 
 def start_progress(tot,p):
     threadpr = threading.Thread(target=progress, args=(tot,p))
     threadpr.start()
     return threadpr
+
+def tot_allan_time(p):
+    tot = 0
+    for i in range(1,p+1):
+        tot = tot+int(float(f'1e{i}'))
+    return tot
