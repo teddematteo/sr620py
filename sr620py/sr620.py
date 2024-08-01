@@ -1,7 +1,7 @@
 """
 Library to control and take measure from a SR620 Universal Time Interval Counter
 
-@requires: pyserial, time
+@requires: pyserial, time, tqdm, threading
 """
 from sr620utils import *
 from sr620exceptions import *
@@ -14,36 +14,86 @@ class SR620():
     MODE_DICT = {'time':0,'width':1,'ratio':2,'freq':3,'period':4,'phase':5,'count':6}
     SOURCE_DICT = {'A':0,'B':1,'REF':2,'RATIO':3}
     JTTR_DICT = {'STD':0,'ALL':1}
+    ARMM_DICT = {'+-time':0,'+time':1,'per':2,'1cs':3,'1ds':4,'1s':5,'ext+-time':6,'ext+time':7,'extgate':8,'ext1per':9,'ext1cs':10,'ext1ds':11,'ext1s':12}
+    CLCK_DICT = {'int':0,'ext':1}
+    SIZE_LIST = [1,2,5,1e1,2e1,5e1,1e2,2e2,5e2,1e3,2e3,5e3,1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6]
+    CLKF_DICT = {'10mhz':0,'5mhz':1}
+    STAT_DICT = {'mean':0,'jitter':1,'max':2,'min':3}
+    ARMM_TIME = {'1cs':0.01,'1ds':0.1,'1s':1,'ext1cs':0.01,'ext1ds':0.1,'ext1s':1}
 
     def __init__(self,serial_port_path:str):
         self.ser = serial.Serial(serial_port_path,9600,timeout=None)
-        self.execute_command(self.ser,"ENDT; STOP",False)
-        self.mode = self.MODE_DICT['freq']
-        self.source = self.SOURCE_DICT['A']
-        self.jttr = self.JTTR_DICT['ALL']
+        self.execute_command("ENDT; STOP",False)
+        #self.set_default_configuration()
         
+    def close_connection(self):
+        self.ser.close()
         
-
-
-    def execute_command(self,ser:serial.Serial,command:str,needs_response:bool):
+    def execute_command(self,command:str,needs_response:bool):
         try:
-            ser.write(f"{command}\r".encode('ASCII'))
+            self.ser.write(command.encode('ASCII')+b'\r')
         except Exception:
-            raise SR620WriteException("An error occurs while writing on the device",errors={"value":1})
+            print('error occured!')
+            raise SR620WriteException("An error occured while writing on the device",errors={"value":1})
 
         if needs_response: #if a response is needed
             try:
-                response = ser.read_until("\r\n".encode('ASCII')).decode('utf-8')
+                response = self.ser.read_until("\r\n".encode('ASCII')).decode('utf-8')
                 return parse_string_to_dict(response)
             except Exception:
                 raise SR620ReadException("An error occurs while reading from the device",errors={"value":1})
             
-    def get_configuration():
-        print('ciao')
-
-    def set_configuration(self,mode=3,source=0,jttr=1):
-        print('ciao')
+    def generate_configuration_string(self) -> str:
+        cmm = f"SRCE {self.source}; MODE {self.mode}; ARMM {self.armm}; SIZE {self.size}; JTTR {self.jttr}; CLCK {self.clock}; CLKF {self.clockfr}"
+        return cmm
             
-    def start_measurement():
-        print('ciao')
+    def set_default_configuration(self):
+        self.set_custom_configuration()
+
+    def set_custom_configuration(self,*,mode='freq',source='A',jitter='ALL',arming='1s',size=1,clock='ext',clockfr='10mhz'):
+        self.mode = self.MODE_DICT[mode]
+        self.source = self.SOURCE_DICT[source]
+        self.jttr = self.JTTR_DICT[jitter]
+        self.armm = self.ARMM_DICT[arming]
+        self.clock = self.CLCK_DICT[clock]
+        self.clockfr = self.CLKF_DICT[clockfr]
+        if (size not in self.SIZE_LIST):
+            raise SR620SizeException(self.SIZE_LIST)
+        else:
+            self.size = size
+        gcs = self.generate_configuration_string()
+        self.execute_command(gcs,False)
+        time.sleep(1)
+            
+    def measure(self,stat:str):
+        thread = None
+        if (self.armm in self.ARMM_DICT.keys()):
+            tt = self.size*self.ARMM_TIME[self.armm]
+            thread = start_progress(tt)
+        res = self.execute_command(f'STOP; MEAS? {self.STAT_DICT[stat]}',True)
+        if (thread!=None):
+            thread.join()
+        return res['value_0']
+
+    def measure_frequency(self,stat:str,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext',clockfr='10mhz'):
+        print('prova')
+
+    def measure_time(self,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext'):
+        print('prova')
+
+    def measure_width(self,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext'):
+        print('prova')
+
+    def measure_ratio(self,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext'):
+        print('prova')
+
+    def measure_period(self,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext'):
+        print('prova')
+
+    def measure_phase(self,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext'):
+        print('prova')
+
+    def measure_count(self,*,source='A',jitter='ALL',arming='1s',size=1,clock='ext'):
+        print('prova')
+    
 

@@ -21,3 +21,9 @@ class SR620WriteException(Exception):
         if self.errors:
             return f"{self.message} (Errors: {self.errors})"
         return self.message
+    
+class SR620SizeException(Exception):
+    """Raised when the user chooses a not valid number of samples"""
+
+    def __init__(self,lst):
+        super().__init__(f"The number of samples must be one of the following values: {str(lst)}")
