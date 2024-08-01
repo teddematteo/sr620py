@@ -1,17 +1,36 @@
 from tqdm import tqdm
+from sr620exceptions import *
 import threading
 import time
 
 def parse_string_to_dict(string:str) -> dict:
-    parts = string.strip().rstrip('\r').split(';')
-    result = {f'value_{i}': float(parts[i]) for i in range(len(parts))}
-    return result
+    result = {'value_0':'-1'}
+    try:
+        parts = string.strip().rstrip('\r').split(',')
+        result = {f'value_{i}': parts[i] for i in range(len(parts))}
+    except Exception:
+        raise SR620ReadException()
+    finally:
+        return result
+    
+def get_key_from_value(d:dict,value):
+    for k, v in d.items():
+        if v == value:
+            return k
+    return None
 
-def progress(i):
-    for j in tqdm(range(i)):
-        time.sleep(i)
+def get_bit(x, i):
+    shifted_x = x >> i
+    bit = shifted_x & 1
+    return bit
 
-def start_progress(i):
-    threadpr = threading.Thread(target=progress, args=(i,))
+def progress(tot,p):
+    print('Measuring...')
+    for j in tqdm(range(tot)):
+        time.sleep(p)
+    print('Measure completed!...')
+
+def start_progress(tot,p):
+    threadpr = threading.Thread(target=progress, args=(tot,p))
     threadpr.start()
     return threadpr
