@@ -24,16 +24,18 @@ def get_bit(x, i):
     bit = shifted_x & 1
     return bit
 
-def progress(tot,p):
+def progress(tot,p,dev):
     print('-------------------------------------')
     print('Measuring...')
     for j in tqdm(range(tot)):
         time.sleep(p)
+        if (not dev.cont):
+            break
     print('Measurement completed!...')
     print('-------------------------------------')
 
-def start_progress(tot,p):
-    threadpr = threading.Thread(target=progress, args=(tot,p))
+def start_progress(tot,p,dev):
+    threadpr = threading.Thread(target=progress, args=(tot,p,dev))
     threadpr.start()
     return threadpr
 

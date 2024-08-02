@@ -18,6 +18,7 @@ class SR620SizeException(Exception):
     def __init__(self,lst):
         super().__init__(f"The number of samples must be one of the following values: {str(lst)}")
 
+
 class SR620ValueException(Exception):
     """Raised when one(or more) of the values set as parameters does not exist!"""
 

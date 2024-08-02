@@ -5,10 +5,12 @@ Library to control and take measure from a SR620 Universal Time Interval Counter
 """
 from sr620utils import *
 from sr620exceptions import *
+from sr620constants import *
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import serial
 import time
+import logging
 
 class SR620():
     """Class describing the SR620 device. This class encapsulates all the functions to configure and control the instrument"""
@@ -21,7 +23,7 @@ class SR620():
     SIZE_LIST = [1,2,5,1e1,2e1,5e1,1e2,2e2,5e2,1e3,2e3,5e3,1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6]
     CLKF_DICT = {'10mhz':0,'5mhz':1}
     STAT_DICT = {'mean':0,'jitter':1,'max':2,'min':3}
-    ARMM_TIME = {'1cs':0.01,'1ds':0.1,'1s':1,'ext1cs':0.01,'ext1ds':0.1,'ext1s':1}
+    ARMM_TIME = {'1cs':0.01,'1ds':0.1,'1s':1,'ext1cs':0.01,'ext1ds':0.1,'ext1s':1,'1per':0.0000001}
     DELAY_CONF = 1
 
     def __init__(self,serial_port_path:str):
@@ -30,9 +32,12 @@ class SR620():
         Parameters:
         :param serial_port_path (str): path of the serial port on which the device is connected (i.e. "/dev/ttyUSB0")
         """
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
         self.ser = serial.Serial(serial_port_path,9600,timeout=None)
         self.execute_command("ENDT; STOP",False)
         self.retrieve_parameters()
+        self.cont = True
+        
         
     def close_connection(self):
         """
@@ -46,18 +51,20 @@ class SR620():
         Parameters:
         :param command (str): command that must be executed, according to the format requested by the device ('command(?) param')
         :param needs_response (bool): when an output is expected from the device must be set on True, otherwise on False
-        :return (dict): value returned when needs_response is set on True. The format is a dictionary whose keys are progressive strings 'value_i', with the corresponding values (i.e. {'value_0':'10','value_1':'5','value_2':'30'})
+        :return (dict): value returned when needs_response is set on True. The format is a dictionary whose keys are progressive strings 'value_i', with the corresponding returned values (i.e. {'value_0':'10','value_1':'5','value_2':'30'})
         """
         try:
             self.ser.write(command.encode('ASCII')+b'\r')
-        except Exception:
+        except BaseException:
+            self.cont = False
             raise SR620WriteException()
 
         if needs_response: #if a response is needed
             try:
                 response = self.ser.read_until("\r\n".encode('ASCII')).decode('utf-8')
                 return parse_string_to_dict(response)
-            except Exception:
+            except BaseException:
+                self.cont = False
                 raise SR620ReadException()
             
     def generate_configuration_string(self) -> str:
@@ -69,7 +76,8 @@ class SR620():
         try:
             cmm = f"SRCE {self.SOURCE_DICT[self.source]}; MODE {self.MODE_DICT[self.mode]}; ARMM {self.ARMM_DICT[self.armm]}; SIZE {self.size}; JTTR {self.JTTR_DICT[self.jttr]}; CLCK {self.CLCK_DICT[self.clock]}; CLKF {self.CLKF_DICT[self.clockfr]}"
             return cmm
-        except Exception:
+        except BaseException:
+            self.cont = False
             raise SR620ValueException()
 
     def apply_custom_configuration(self,*,print=True):
@@ -84,7 +92,7 @@ class SR620():
         time.sleep(self.DELAY_CONF)
         self.retrieve_parameters()
 
-    def set_custom_configuration(self,*,mode=None,source=None,jitter=None,arming=None,size=None,clock=None,clockfr=None,print=False):
+    def set_custom_configuration(self,*,mode=None,source=None,jitter=None,arming=None,size=None,clock=None,clock_frequency=None,print=False):
         """
         Choose the configuration to apply on the device. All the parameters are optional, which means that if something is not specified, than it is kept on the current value. The function will finally apply the new configuration on the device.
         Parameters:
@@ -102,7 +110,7 @@ class SR620():
         if jitter!=None: self.jttr = jitter
         if arming!=None: self.armm = arming
         if clock!=None: self.clock = clock
-        if clockfr!=None: self.clockfr = clockfr
+        if clock_frequency!=None: self.clockfr = clock_frequency
         if size!=None: 
             if (size not in self.SIZE_LIST):
                 raise SR620SizeException(self.SIZE_LIST)
@@ -195,7 +203,7 @@ class SR620():
         """
         return f"-------------------------------------\n***SR620 parameters configuration***\nMode: {self.mode}\nSource: {self.source}\nArming: {self.armm}\nNumOfSamples: {self.size}\nTypeOfJitter: {self.jttr}\nClock: {self.clock}\nClockFrequency: {self.clockfr}\n-------------------------------------"
     
-    def measure(self,stat:str,*,progress=True) -> float:
+    def measure(self,stat=STATISTICS_MEAN,*,progress=True) -> float:
         """
         Start a new measurement of the specified statistics on the device.
         Parameters:
@@ -205,48 +213,55 @@ class SR620():
         self.ser.flush()
         thread = None
         if (progress and self.armm in self.ARMM_TIME.keys() and self.mode=='freq'):        
-            thread = start_progress(int(self.size),self.ARMM_TIME[self.armm])
+            thread = start_progress(int(self.size),self.ARMM_TIME[self.armm],self)
         res = self.execute_command(f'STOP; AUTM 0; MEAS? {self.STAT_DICT[stat]}',True)
         if (thread!=None):
             thread.join()
         return float(res['value_0'])
     
-    def start_measurement_set(self,stat:str,num_meas:int,*,file_path=None,progress=False):
+    def start_measurement_set(self,stat:str,num_meas:int,*,file_path=None,progress=False) -> list:
         """
-        Start a new set of measures of the specified statistics on the device.
+        Start a new set of measures of the specified statistics on the device. Return a list of the measurements.
         Parameters:
         :param stat (str): string representing the statistics to measure. Options: 'mean','jitter','max','min'
         :param num_meas (int): number of measurements to perform
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
         :param progress (bool): when it is set on True, a progress bar is showed on the console
+        :return (list): list of float values corresponding to the measurements
         """
         print('Measurement set started...')
         fout = None
+        lst = []
         if file_path!=None:
             fout = open(file_path,'w')
             fout.write(f'timestamp,{stat}\n')
             fout.flush()
         for i in range(num_meas):
             res = self.measure(stat,progress=progress)
-            rec = f"{datetime.now(ZoneInfo('Europe/Rome')).strftime('%Y-%m-%d_%H-%M-%S')},{res}"
+            lst.append(res)
+            rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
             print(rec)
             if fout!=None:
                 fout.write(rec+'\n')
                 fout.flush()
-        if fout!=None: fout.close()
-        print(f'Measurement set concluded, file saved in {file_path}')
+        if fout!=None:
+            fout.close()
+            print(f'Measurement set concluded, file saved in {file_path}')
+        return lst
 
-    def start_measurement_allan_variance(self,num_powers:int,*,file_path=None,progress=True):
+    def start_measurement_allan_variance(self,num_powers:int,*,file_path=None,progress=True) -> dict:
         """
-        Start a set of measurements corresponding to the Allan Variance for an increasing number of observations.
+        Start a set of measurements corresponding to the Allan Variance for an increasing number of observations. Return a dictionary of the measurements.
         Parameters:
         :param num_powers (int): number of 'powers of ten' of observations to consider (i.e. if num_powers is set to 3, then the Allan Variance will be computed on 10^1, 10^2 and 10^3)
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
         :param progress (bool): when it is set on True, a progress bar is showed on the console
+        :return (dict): dictionary containing the measurements. The keys are the powers of ten, while the values are the corresponding Allan Variances
         """
         thread = None
+        dct = {}
         if (progress):        
-            thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm])
+            thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm],self)
         self.set_custom_configuration(
             mode='freq',
             jitter='ALL',
@@ -260,9 +275,12 @@ class SR620():
         for i in range(1,num_powers+1):
             self.set_number_samples(int(float(f'1e{i}')),print=False)
             res = self.measure('jitter',progress=False)
+            dct[float(f'1e{i}')] = res
             rec = f"1e{i},{res}"
             if fout!=None:
                 fout.write(rec+'\n')
                 fout.flush()
-        if fout!=None: fout.close()
-        print(f'File saved in {file_path}')
+        if fout!=None: 
+            fout.close()
+            print(f'File saved in {file_path}')
+        return dct
