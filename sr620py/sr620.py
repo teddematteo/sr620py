@@ -103,13 +103,13 @@ class SR620():
         """
         Choose the configuration to apply on the device. All the parameters are optional, which means that if something is not specified, than it is kept on the current value. The function will finally apply the new configuration on the device.
         Parameters:
-        :param mode (str): string representing the mode of measurement. Options: 'time','width','ratio','freq','period','phase','count'
-        :param source (str): string representing the source of the measurement. Options: 'A','B','REF','RATIO'
-        :param jitter (str): string representing the kind of jitter to compute. Options: 'ALL'(for Allan Variance),'STD'(for Standard Deviation)
-        :param arming (str): string representing the kind of arming to use. Options: '+-time','+time','1per'(1 period),'1cs'(0.01 s),'1ds'(0.1 s),'1s'(1 s),'ext+-time','ext+time','extgate','ext1per','ext1cs','ext1ds','ext1s'
+        :param mode (str): string representing the mode of measurement. Options: MODE_TIME,MODE_WIDTH,MODE_RATIO,MODE_FREQUENCY,MODE_PERIOD,MODE_PHASE,MODE_COUNT
+        :param source (str): string representing the source of the measurement. Options: SOURCE_A,SOURCE_B,SOURCE_REF,SOURCE_RATIO
+        :param jitter (str): string representing the kind of jitter to compute. Options: JITTER_ALLAN(for Allan Variance),JITTER_STDDEV(for Standard Deviation)
+        :param arming (str): string representing the kind of arming to use. Options: ARMING_PLUS_MINUS_TIME,ARMING_PLUS_TIME,ARMING_PERIOD(1 period),ARMING_CENTISECOND(0.01 s),ARMING_DECISECOND(0.1 s),ARMING_SECOND(1 s),ARMING_EXT_PLUS_MINUS_TIME,ARMING_EXT_PLUS_TIME,ARMING_EXT_GATE,ARMING_EXT_PERIOD,ARMING_EXT_CENTISECOND,ARMING_EXT_DECISECOND,ARMING_EXT_SECOND
         :param size (float): number representing the number of samples. The value must be one the following: 1,2,5,1e1,2e1,5e1,1e2,2e2,5e2,1e3,2e3,5e3,1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6
-        :param clock (str): string representing the source of the clock, internal or external. Options: 'int','ext'
-        :param clockfr (str): string representing the frequency of the clock. Options: '10mhz'(10 MegaHz),'5mhz'(5 MegaHz)
+        :param clock (str): string representing the source of the clock, internal or external. Options: CLOCK_INTERNAL,CLOCK_EXTERNAL
+        :param clockfr (str): string representing the frequency of the clock. Options: CLOCK_FREQUENCY_10_MEGAHZ,CLOCK_FREQUENCY_5_MEGAHZ
         :param print (bool): when it is set on True, a feedback string is printed
         """
         if mode!=None: self.mode = mode
@@ -131,7 +131,7 @@ class SR620():
         """
         Set the mode of measurement.
         Parameters:
-        :param mode (str): string representing the mode of measurement. Options: 'time','width','ratio','freq','period','phase','count'
+        :param mode (str): string representing the mode of measurement. Options: MODE_TIME,MODE_WIDTH,MODE_RATIO,MODE_FREQUENCY,MODE_PERIOD,MODE_PHASE,MODE_COUNT
         :param print (bool): when it is set on True, a feedback string is printed
         """
         self.set_custom_configuration(mode=mode,print=print)
@@ -140,7 +140,7 @@ class SR620():
         """
         Set the source of the measurement.
         Parameters:
-        :param source (str): string representing the source of the measurement. Options: 'A','B','REF','RATIO'+
+        :param source (str): string representing the source of the measurement. Options: SOURCE_A,SOURCE_B,SOURCE_REF,SOURCE_RATIO
         :param print (bool): when it is set on True, a feedback string is printed
         """
         self.set_custom_configuration(source=source,print=print)
@@ -149,7 +149,7 @@ class SR620():
         """
         Set the kind of jitter to compute.
         Parameters:
-        :param jitter (str): string representing the kind of jitter to compute. Options: 'ALL'(for Allan Variance),'STD'(for Standard Deviation)
+        :param jitter (str): string representing the kind of jitter to compute. Options: JITTER_ALLAN(for Allan Variance),JITTER_STDDEV(for Standard Deviation)
         :param print (bool): when it is set on True, a feedback string is printed
         """
         self.set_custom_configuration(jitter=jitter,print=print)
@@ -158,7 +158,7 @@ class SR620():
         """
         Set the kind of arming to use.
         Parameters:
-        :param arming (str): string representing the kind of arming to use. Options: '+-time','+time','1per'(1 period),'1cs'(0.01 s),'1ds'(0.1 s),'1s'(1 s),'ext+-time','ext+time','extgate','ext1per','ext1cs','ext1ds','ext1s'
+        :param arming (str): string representing the kind of arming to use. Options: ARMING_PLUS_MINUS_TIME,ARMING_PLUS_TIME,ARMING_PERIOD(1 period),ARMING_CENTISECOND(0.01 s),ARMING_DECISECOND(0.1 s),ARMING_SECOND(1 s),ARMING_EXT_PLUS_MINUS_TIME,ARMING_EXT_PLUS_TIME,ARMING_EXT_GATE,ARMING_EXT_PERIOD,ARMING_EXT_CENTISECOND,ARMING_EXT_DECISECOND,ARMING_EXT_SECOND
         :param print (bool): when it is set on True, a feedback string is printed
         """
         self.set_custom_configuration(arming=arming,print=print)
@@ -176,7 +176,7 @@ class SR620():
         """
         Set the source of the clock, internal or external.
         Parameters:
-        :param clock (str): string representing the source of the clock, internal or external. Options: 'int','ext'
+        :param clock (str): string representing the source of the clock, internal or external. Options: CLOCK_INTERNAL,CLOCK_EXTERNAL
         :param print (bool): when it is set on True, a feedback string is printed
         """
         self.set_custom_configuration(clock=clock,print=print)
@@ -185,7 +185,7 @@ class SR620():
         """
         Set the frequeny of the clock.
         Parameters:
-        :param clockfr (str): string representing the frequency of the clock. Options: '10mhz'(10 MegaHz),'5mhz'(5 MegaHz)
+        :param clockfr (str): string representing the frequency of the clock. Options: CLOCK_FREQUENCY_10_MEGAHZ,CLOCK_FREQUENCY_5_MEGAHZ
         :param print (bool): when it is set on True, a feedback string is printed
         """
         self.set_custom_configuration(clockfr=clockfr,print=print)
@@ -216,7 +216,7 @@ class SR620():
         """
         Start a new measurement of the specified statistics on the device.
         Parameters:
-        :param stat (str): string representing the statistics to measure. Options: 'mean','jitter','max','min'
+        :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
         :param progress (bool): when it is set on True, a progress bar is showed on the console
         """
         self.ser.flush()
@@ -232,7 +232,7 @@ class SR620():
         """
         Start a new set of measures of the specified statistics on the device. Return a list of the measurements.
         Parameters:
-        :param stat (str): string representing the statistics to measure. Options: 'mean','jitter','max','min'
+        :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
         :param num_meas (int): number of measurements to perform
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
         :param progress (bool): when it is set on True, a progress bar is showed on the console

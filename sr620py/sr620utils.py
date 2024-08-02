@@ -27,14 +27,12 @@ def get_bit(x, i):
     return bit
 
 def progress(tot,p,dev):
-    print('-------------------------------------')
-    print('Measuring...')
+    logging.debug('Start measuring...')
     for j in tqdm(range(tot)):
         time.sleep(p)
         if (not dev.cont):
             break
-    print('Measurement completed!...')
-    print('-------------------------------------')
+    logging.debug('Measurement completed!...')
 
 def start_progress(tot,p,dev):
     threadpr = threading.Thread(target=progress, args=(tot,p,dev))
@@ -46,3 +44,9 @@ def tot_allan_time(p):
     for i in range(1,p+1):
         tot = tot+int(float(f'1e{i}'))
     return tot
+
+# def get_log_file_path():
+#     for handler in logging.getLogger().handlers:
+#         if isinstance(handler, logging.FileHandler):
+#             return open(handler.baseFilename,'a')
+#     return None
