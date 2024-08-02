@@ -1,0 +1,130 @@
+2024-08-02 12:17:51,696 - ERROR - primo debug
+2024-08-02 12:18:00,014 - ERROR - primo debug
+2024-08-02 12:21:19,816 - ERROR - One (or more) of the parameters does not exist
+2024-08-02 12:22:21,057 - ERROR - One (or more) of the parameters does not exist! The execution has been concluded... please, check the documentation!
+2024-08-02 12:23:28,061 - DEBUG - Connection established...
+2024-08-02 12:23:28,156 - ERROR - One (or more) of the parameters does not exist! The execution has been concluded... please, check the documentation!
+2024-08-02 12:23:45,809 - DEBUG - Connection established...
+2024-08-02 12:23:47,130 - DEBUG - ...Connection expired!
+2024-08-02 12:28:06,366 - DEBUG - Connection established...
+2024-08-02 12:28:07,696 - DEBUG - ...Connection expired!
+2024-08-02 12:28:20,702 - DEBUG - Connection established...
+2024-08-02 12:28:20,799 - DEBUG - Setting parameters...
+2024-08-02 12:28:21,886 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1per
+NumOfSamples: 1
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:28:22,031 - DEBUG - ...Connection expired!
+2024-08-02 12:28:55,369 - DEBUG - Connection established...
+2024-08-02 12:28:55,471 - DEBUG - Setting parameters...
+2024-08-02 12:28:56,559 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1s
+NumOfSamples: 10.0
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:29:16,718 - DEBUG - ...Connection expired!
+2024-08-02 12:33:09,791 - DEBUG - Connection established...
+2024-08-02 12:33:09,886 - DEBUG - Setting parameters...
+2024-08-02 12:33:10,974 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1s
+NumOfSamples: 1
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:33:10,975 - DEBUG - Measurement set started...
+2024-08-02 12:33:12,046 - DEBUG - Value read: 2024-08-02 14:33:12.046354+02:00,9999999.92892
+2024-08-02 12:33:13,102 - DEBUG - Value read: 2024-08-02 14:33:13.101956+02:00,9999999.93042
+2024-08-02 12:33:13,102 - DEBUG - ...Connection expired!
+2024-08-02 12:33:49,113 - DEBUG - Connection established...
+2024-08-02 12:33:49,215 - DEBUG - Setting parameters...
+2024-08-02 12:33:50,302 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1s
+NumOfSamples: 1
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:33:50,304 - DEBUG - Measurement set started...
+2024-08-02 12:33:51,374 - DEBUG - Value read: 2024-08-02 14:33:51.374614+02:00,9999999.92944
+2024-08-02 12:33:52,430 - DEBUG - Value read: 2024-08-02 14:33:52.430831+02:00,9999999.92808
+2024-08-02 12:33:52,431 - DEBUG - ...Connection expired!
+2024-08-02 12:34:05,603 - DEBUG - Connection established...
+2024-08-02 12:34:05,696 - DEBUG - Setting parameters...
+2024-08-02 12:34:06,783 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1s
+NumOfSamples: 1
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:34:06,785 - DEBUG - Measurement set started...
+2024-08-02 12:34:34,386 - DEBUG - Connection established...
+2024-08-02 12:34:34,478 - DEBUG - Setting parameters...
+2024-08-02 12:34:35,565 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1s
+NumOfSamples: 1
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:34:35,566 - DEBUG - Measurement set started...
+2024-08-02 12:34:36,637 - DEBUG - Value read: 9999999.92944
+2024-08-02 12:34:37,693 - DEBUG - Value read: 9999999.92716
+2024-08-02 12:34:37,694 - DEBUG - ...Connection expired!
+2024-08-02 12:35:34,675 - DEBUG - Connection established...
+2024-08-02 12:35:35,858 - DEBUG - Measurement set started...
+2024-08-02 12:35:36,929 - DEBUG - Value read: 9999999.93028
+2024-08-02 12:35:38,000 - DEBUG - Value read: 9999999.92749
+2024-08-02 12:35:38,001 - DEBUG - ...Connection expired!
+2024-08-02 12:37:23,365 - DEBUG - Connection established...
+2024-08-02 12:37:36,789 - DEBUG - ...Connection expired!
+2024-08-02 12:37:58,153 - DEBUG - Connection established...
+2024-08-02 12:38:11,572 - DEBUG - ...Connection expired!
+2024-08-02 12:39:54,217 - DEBUG - Connection established...
+2024-08-02 12:39:54,314 - DEBUG - Setting parameters...
+2024-08-02 12:39:55,402 - INFO - Current configuration:
+-------------------------------------
+***SR620 parameters configuration***
+Mode: freq
+Source: A
+Arming: 1s
+NumOfSamples: 1
+TypeOfJitter: ALL
+Clock: ext
+ClockFrequency: 10mhz
+-------------------------------------
+2024-08-02 12:40:07,641 - DEBUG - ...Connection expired!
+2024-08-02 12:44:09,297 - DEBUG - Connection established...
+2024-08-02 12:44:09,397 - ERROR - The size insterted is not valid! The execution has been concluded... please, check the documentation!
+2024-08-02 12:44:43,892 - DEBUG - Connection established...
+2024-08-02 12:44:43,987 - ERROR - The size inserted is not valid! The execution has been concluded... please, check the documentation!

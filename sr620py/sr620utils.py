@@ -2,13 +2,15 @@ from sr620exceptions import *
 from tqdm import tqdm
 import threading
 import time
+import logging
 
 def parse_string_to_dict(string:str) -> dict:
     result = {'value_0':'-1'}
     try:
         parts = string.strip().rstrip('\r').split(',')
         result = {f'value_{i}': parts[i] for i in range(len(parts))}
-    except Exception:
+    except BaseException:
+        logging.error("An error has occured while reading from the device. The execution has been concluded!")
         raise SR620ReadException()
     finally:
         return result

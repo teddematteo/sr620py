@@ -26,14 +26,17 @@ class SR620():
     ARMM_TIME = {'1cs':0.01,'1ds':0.1,'1s':1,'ext1cs':0.01,'ext1ds':0.1,'ext1s':1,'1per':0.0000001}
     DELAY_CONF = 1
 
-    def __init__(self,serial_port_path:str):
+    def __init__(self,serial_port_path:str,log_file=None):
         """
         Constructor.
         Parameters:
         :param serial_port_path (str): path of the serial port on which the device is connected (i.e. "/dev/ttyUSB0")
+        :param log_file (str): path to the log file. If nothing is specified, then the output will be the console
         """
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(filename=log_file,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
         self.ser = serial.Serial(serial_port_path,9600,timeout=None)
+        logging.debug('Connection established...')
         self.execute_command("ENDT; STOP",False)
         self.retrieve_parameters()
         self.cont = True
@@ -43,6 +46,7 @@ class SR620():
         """
         Close the serial port connection.
         """
+        logging.debug('...Connection expired!')
         self.ser.close()
         
     def execute_command(self,command:str,needs_response:bool):
@@ -57,6 +61,7 @@ class SR620():
             self.ser.write(command.encode('ASCII')+b'\r')
         except BaseException:
             self.cont = False
+            logging.error("An error has occured while writing on the device. The execution has been concluded!")
             raise SR620WriteException()
 
         if needs_response: #if a response is needed
@@ -65,6 +70,7 @@ class SR620():
                 return parse_string_to_dict(response)
             except BaseException:
                 self.cont = False
+                logging.error("An error has occured while reading from the device. The execution has been concluded!")
                 raise SR620ReadException()
             
     def generate_configuration_string(self) -> str:
@@ -78,6 +84,7 @@ class SR620():
             return cmm
         except BaseException:
             self.cont = False
+            logging.error("One (or more) of the parameters does not exist! The execution has been concluded... please, check the documentation!")
             raise SR620ValueException()
 
     def apply_custom_configuration(self,*,print=True):
@@ -88,7 +95,7 @@ class SR620():
         """
         gcs = self.generate_configuration_string()
         self.execute_command(gcs,False)
-        if print: print('Setting parameters...')
+        if print: logging.debug('Setting parameters...')
         time.sleep(self.DELAY_CONF)
         self.retrieve_parameters()
 
@@ -113,10 +120,12 @@ class SR620():
         if clock_frequency!=None: self.clockfr = clock_frequency
         if size!=None: 
             if (size not in self.SIZE_LIST):
+                logging.error("The size inserted is not valid! The execution has been concluded... please, check the documentation!")
                 raise SR620SizeException(self.SIZE_LIST)
             else:
                 self.size = size
         self.apply_custom_configuration(print=print)
+        if print: logging.info("Current configuration:\n"+str(self))
             
     def set_mode(self,mode:str,*,print=False):
         """
@@ -219,7 +228,7 @@ class SR620():
             thread.join()
         return float(res['value_0'])
     
-    def start_measurement_set(self,stat:str,num_meas:int,*,file_path=None,progress=False) -> list:
+    def start_measurement_set(self,stat:str,num_meas:int,*,file_path=None,print=True,progress=False) -> list:
         """
         Start a new set of measures of the specified statistics on the device. Return a list of the measurements.
         Parameters:
@@ -229,7 +238,7 @@ class SR620():
         :param progress (bool): when it is set on True, a progress bar is showed on the console
         :return (list): list of float values corresponding to the measurements
         """
-        print('Measurement set started...')
+        if print: logging.debug('Measurement set started...')
         fout = None
         lst = []
         if file_path!=None:
@@ -240,13 +249,13 @@ class SR620():
             res = self.measure(stat,progress=progress)
             lst.append(res)
             rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
-            print(rec)
+            if print: logging.debug(f'Value read: {res}')
             if fout!=None:
                 fout.write(rec+'\n')
                 fout.flush()
         if fout!=None:
             fout.close()
-            print(f'Measurement set concluded, file saved in {file_path}')
+            if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
         return lst
 
     def start_measurement_allan_variance(self,num_powers:int,*,file_path=None,progress=True) -> dict:
@@ -282,5 +291,5 @@ class SR620():
                 fout.flush()
         if fout!=None: 
             fout.close()
-            print(f'File saved in {file_path}')
+            if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
         return dct
