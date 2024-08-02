@@ -1,5 +1,5 @@
-from tqdm import tqdm
 from sr620exceptions import *
+from tqdm import tqdm
 import threading
 import time
 
