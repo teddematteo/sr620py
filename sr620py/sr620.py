@@ -66,8 +66,11 @@ class SR620():
         Parameters:
         :return (str): string representing the command
         """
-        cmm = f"SRCE {self.SOURCE_DICT[self.source]}; MODE {self.MODE_DICT[self.mode]}; ARMM {self.ARMM_DICT[self.armm]}; SIZE {self.size}; JTTR {self.JTTR_DICT[self.jttr]}; CLCK {self.CLCK_DICT[self.clock]}; CLKF {self.CLKF_DICT[self.clockfr]}"
-        return cmm
+        try:
+            cmm = f"SRCE {self.SOURCE_DICT[self.source]}; MODE {self.MODE_DICT[self.mode]}; ARMM {self.ARMM_DICT[self.armm]}; SIZE {self.size}; JTTR {self.JTTR_DICT[self.jttr]}; CLCK {self.CLCK_DICT[self.clock]}; CLKF {self.CLKF_DICT[self.clockfr]}"
+            return cmm
+        except Exception:
+            raise SR620ValueException()
 
     def apply_custom_configuration(self,*,print=True):
         """
