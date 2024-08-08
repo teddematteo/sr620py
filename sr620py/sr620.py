@@ -41,8 +41,10 @@ class SR620():
         logging.basicConfig(filename=log_file,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
         self.ser = serial.Serial(serial_port_path,9600,timeout=None)
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
         logging.debug('Connection established...')
-        self.execute_command("ENDT; STOP",False)
+        self.execute_command("ENDT; STOP;",False)
         self.retrieve_parameters()
         self.cont = True
         
@@ -71,7 +73,8 @@ class SR620():
 
         if needs_response: #if a response is needed
             try:
-                response = self.ser.read_until("\r\n".encode('ASCII')).decode('utf-8')
+                response = self.ser.read_until(b'\r\n').decode('utf-8')
+                print(response)
                 return parse_string_to_dict(response)
             except BaseException:
                 self.cont = False
@@ -258,6 +261,38 @@ class SR620():
             if fout!=None:
                 fout.write(rec+'\n')
                 fout.flush()
+        if fout!=None:
+            fout.close()
+            if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+        return lst
+
+    def start_measurement_set_forever(self,stat:str,*,file_path=None,print=True,progress=False) -> list:
+        """
+        Start a new set of measures of the specified statistics on the device. Return a list of the measurements.
+        Parameters:
+        :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
+        :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
+        :param progress (bool): when it is set on True, a progress bar is showed on the console
+        :return (list): list of float values corresponding to the measurements
+        """
+        if print: logging.debug('Measurement set started...')
+        fout = None
+        lst = []
+        if file_path!=None:
+            fout = open(file_path,'w')
+            fout.write(f'timestamp,{stat}\n')
+            fout.flush()
+        while True:
+            try:
+                res = self.measure(stat,progress=progress)
+                lst.append(res)
+                rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
+                if print: logging.debug(f'Value read: {res}')
+                if fout!=None:
+                    fout.write(rec+'\n')
+                    fout.flush()
+            except KeyboardInterrupt:
+                break
         if fout!=None:
             fout.close()
             if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
