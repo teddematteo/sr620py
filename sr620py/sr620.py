@@ -38,17 +38,13 @@ class SR620():
         :param serial_port_path (str): path of the serial port on which the device is connected (i.e. "/dev/ttyUSB0")
         :param log_file (str): path to the log file. If nothing is specified, then the output will be the console
         """
-        logging.basicConfig(filename=log_file,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-        self.ser = serial.Serial(serial_port_path,9600,timeout=None)
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
-        logging.debug('Connection established...')
-        self.execute_command("ENDT; STOP;",False)
-        self.retrieve_parameters()
         self.cont = True
-        
-        
+        logging.basicConfig(filename=log_file,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+        self.ser = serial.Serial(serial_port_path,9600,timeout=None)
+        self.__execute_command__("STOP;AUTM0;",False)
+        logging.debug('Connection established...')
+        self.retrieve_parameters()
+            
     def close_connection(self):
         """
         Close the serial port connection.
@@ -56,7 +52,7 @@ class SR620():
         logging.debug('...Connection expired!')
         self.ser.close()
         
-    def execute_command(self,command:str,needs_response:bool):
+    def __execute_command__(self,command:str,needs_response:bool):
         """
         Execute a command on the machine.
         Parameters:
@@ -65,8 +61,13 @@ class SR620():
         :return (dict): value returned when needs_response is set on True. The format is a dictionary whose keys are progressive strings 'value_i', with the corresponding returned values (i.e. {'value_0':'10','value_1':'5','value_2':'30'})
         """
         try:
+            self.ser.timeout = 0.1 #clean the buffer (the only working way...)
+            self.ser.readall()
+            self.ser.timeout = None
+            
             self.ser.write(command.encode('ASCII')+b'\r')
-        except BaseException:
+            self.ser.flush()
+        except:
             self.cont = False
             logging.error("An error has occured while writing on the device. The execution has been concluded!")
             raise SR620WriteException()
@@ -74,12 +75,13 @@ class SR620():
         if needs_response: #if a response is needed
             try:
                 response = self.ser.read_until(b'\r\n').decode('utf-8')
-                print(response)
                 return parse_string_to_dict(response)
-            except BaseException:
+            except:
                 self.cont = False
                 logging.error("An error has occured while reading from the device. The execution has been concluded!")
                 raise SR620ReadException()
+            
+        
             
     def generate_configuration_string(self) -> str:
         """
@@ -88,7 +90,7 @@ class SR620():
         :return (str): string representing the command
         """
         try:
-            cmm = f"SRCE {self.SOURCE_DICT[self.source]}; MODE {self.MODE_DICT[self.mode]}; ARMM {self.ARMM_DICT[self.armm]}; SIZE {self.size}; JTTR {self.JTTR_DICT[self.jttr]}; CLCK {self.CLCK_DICT[self.clock]}; CLKF {self.CLKF_DICT[self.clockfr]}"
+            cmm = f"SRCE {self.SOURCE_DICT[self.source]}; MODE {self.MODE_DICT[self.mode]}; ARMM {self.ARMM_DICT[self.armm]}; SIZE {self.size}; JTTR {self.JTTR_DICT[self.jttr]}; CLCK {self.CLCK_DICT[self.clock]}; CLKF {self.CLKF_DICT[self.clockfr]};"
             return cmm
         except BaseException:
             self.cont = False
@@ -102,7 +104,7 @@ class SR620():
         :param print (bool): when it is set on True, a feedback string is printed
         """
         gcs = self.generate_configuration_string()
-        self.execute_command(gcs,False)
+        self.__execute_command__(gcs,False)
         if print: logging.debug('Setting parameters...')
         time.sleep(self.DELAY_CONF)
         self.retrieve_parameters()
@@ -120,20 +122,23 @@ class SR620():
         :param clockfr (str): string representing the frequency of the clock. Options: CLOCK_FREQUENCY_10_MEGAHZ,CLOCK_FREQUENCY_5_MEGAHZ
         :param print (bool): when it is set on True, a feedback string is printed
         """
-        if mode!=None: self.mode = mode
-        if source!=None: self.source = source
-        if jitter!=None: self.jttr = jitter
-        if arming!=None: self.armm = arming
-        if clock!=None: self.clock = clock
-        if clock_frequency!=None: self.clockfr = clock_frequency
-        if size!=None: 
-            if (size not in self.SIZE_LIST):
-                logging.error("The size inserted is not valid! The execution has been concluded... please, check the documentation!")
-                raise SR620SizeException(self.SIZE_LIST)
-            else:
-                self.size = size
-        self.apply_custom_configuration(print=print)
-        if print: logging.info("Current configuration:\n"+str(self))
+        try:
+            if mode!=None: self.mode = mode
+            if source!=None: self.source = source
+            if jitter!=None: self.jttr = jitter
+            if arming!=None: self.armm = arming
+            if clock!=None: self.clock = clock
+            if clock_frequency!=None: self.clockfr = clock_frequency
+            if size!=None: 
+                if (size not in self.SIZE_LIST):
+                    logging.error("The size inserted is not valid! The execution has been concluded... please, check the documentation!")
+                    raise SR620SizeException(self.SIZE_LIST)
+                else:
+                    self.size = size
+            self.apply_custom_configuration(print=print)
+            if print: logging.info("Current configuration:\n"+str(self))
+        except:
+            logging.error("Configuration set terminated")
             
     def set_mode(self,mode:str,*,print=False):
         """
@@ -202,7 +207,7 @@ class SR620():
         """
         Retrieve the parameters set on the device, saving them in the corresponding attributes of the class.
         """
-        res = self.execute_command('STUP?',True)
+        res = self.__execute_command__("STUP?;",True)
         x = int(res['value_7'])
         self.mode = get_key_from_value(self.MODE_DICT,int(res['value_0']))
         self.source = get_key_from_value(self.SOURCE_DICT,int(res['value_1']))
@@ -227,14 +232,16 @@ class SR620():
         :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
         :param progress (bool): when it is set on True, a progress bar is showed on the console
         """
-        self.ser.flush()
-        thread = None
-        if (progress and self.armm in self.ARMM_TIME.keys() and self.mode=='freq'):        
-            thread = start_progress(int(self.size),self.ARMM_TIME[self.armm],self)
-        res = self.execute_command(f'STOP; AUTM 0; MEAS? {self.STAT_DICT[stat]}',True)
-        if (thread!=None):
-            thread.join()
-        return float(res['value_0'])
+        try:
+            thread = None
+            if (progress and self.armm in self.ARMM_TIME.keys() and self.mode=='freq'):        
+                thread = start_progress(int(self.size),self.ARMM_TIME[self.armm],self)
+            res = self.__execute_command__(f'STOP; AUTM 0; MEAS? {self.STAT_DICT[stat]}',True)
+            if (thread!=None):
+                thread.join()
+            return float(res['value_0'])
+        except:
+            logging.error('Measure terminated')
     
     def start_measurement_set(self,stat:str,num_meas:int,*,file_path=None,print=True,progress=False) -> list:
         """
@@ -249,21 +256,24 @@ class SR620():
         if print: logging.debug('Measurement set started...')
         fout = None
         lst = []
-        if file_path!=None:
-            fout = open(file_path,'w')
-            fout.write(f'timestamp,{stat}\n')
-            fout.flush()
-        for i in range(num_meas):
-            res = self.measure(stat,progress=progress)
-            lst.append(res)
-            rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
-            if print: logging.debug(f'Value read: {res}')
-            if fout!=None:
-                fout.write(rec+'\n')
+        try:
+            if file_path!=None:
+                fout = open(file_path,'w')
+                fout.write(f'timestamp,{stat}\n')
                 fout.flush()
-        if fout!=None:
-            fout.close()
-            if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+            for i in range(num_meas):
+                res = self.measure(stat,progress=progress)
+                lst.append(res)
+                rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
+                if print: logging.debug(f'Value read: {res}')
+                if fout!=None:
+                    fout.write(rec+'\n')
+                    fout.flush()
+            if fout!=None:
+                fout.close()
+                if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+        except:
+            logging.error('Measurement set terminated')
         return lst
 
     def start_measurement_set_forever(self,stat:str,*,file_path=None,print=True,progress=False) -> list:
@@ -278,24 +288,27 @@ class SR620():
         if print: logging.debug('Measurement set started...')
         fout = None
         lst = []
-        if file_path!=None:
-            fout = open(file_path,'w')
-            fout.write(f'timestamp,{stat}\n')
-            fout.flush()
-        while True:
-            try:
-                res = self.measure(stat,progress=progress)
-                lst.append(res)
-                rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
-                if print: logging.debug(f'Value read: {res}')
-                if fout!=None:
-                    fout.write(rec+'\n')
-                    fout.flush()
-            except KeyboardInterrupt:
-                break
-        if fout!=None:
-            fout.close()
-            if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+        try:
+            if file_path!=None:
+                fout = open(file_path,'w')
+                fout.write(f'timestamp,{stat}\n')
+                fout.flush()
+            while self.cont:
+                try:
+                    res = self.measure(stat,progress=progress)
+                    lst.append(res)
+                    rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
+                    if print: logging.debug(f'Value read: {res}')
+                    if fout!=None:
+                        fout.write(rec+'\n')
+                        fout.flush()
+                except KeyboardInterrupt:
+                    break
+            if fout!=None:
+                fout.close()
+                if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+        except:
+            logging.error('Measurement set terminated')
         return lst
 
     def start_measurement_allan_variance(self,num_powers:int,*,file_path=None,progress=True) -> dict:
@@ -309,27 +322,31 @@ class SR620():
         """
         thread = None
         dct = {}
-        if (progress):        
-            thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm],self)
-        self.set_custom_configuration(
-            mode='freq',
-            jitter='ALL',
-            print=False
-        )
-        fout = None
-        if file_path!=None:
-            fout = open(file_path,'w')
-            fout.write(f'number of observations,allan variance\n')
-            fout.flush()
-        for i in range(1,num_powers+1):
-            self.set_number_samples(int(float(f'1e{i}')),print=False)
-            res = self.measure('jitter',progress=False)
-            dct[float(f'1e{i}')] = res
-            rec = f"1e{i},{res}"
-            if fout!=None:
-                fout.write(rec+'\n')
+        try:
+            if (progress):        
+                thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm],self)
+            self.set_custom_configuration(
+                mode='freq',
+                jitter='ALL',
+                print=False
+            )
+            fout = None
+            if file_path!=None:
+                fout = open(file_path,'w')
+                fout.write(f'number of observations,allan variance\n')
                 fout.flush()
-        if fout!=None: 
-            fout.close()
-            if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+            for i in range(1,num_powers+1):
+                if self.cont:
+                    self.set_number_samples(int(float(f'1e{i}')),print=False)
+                    res = self.measure('jitter',progress=False)
+                    dct[float(f'1e{i}')] = res
+                    rec = f"1e{i},{res}"
+                    if fout!=None:
+                        fout.write(rec+'\n')
+                        fout.flush()
+            if fout!=None: 
+                fout.close()
+                if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+        except:
+            logging.error('Measurement set terminated')
         return dct
