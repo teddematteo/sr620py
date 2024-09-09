@@ -1,2 +1,2 @@
-from sr620 import SR620
-from sr620constants import *
+import sr620
+import sr620exceptions
