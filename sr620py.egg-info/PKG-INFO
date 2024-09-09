@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: sr620py
+Version: 0.1
+Summary: Manage a SR620 Universal Time Counter
+Home-page: https://github.com/teddematteo/sr620py
+Download-URL: https://github.com/teddematteo/sr620py/archive/refs/tags/v_01.tar.gz
+Author: Matteo Tedde (Lab3841)
+Author-email: teddematteo03@gmail.com
+License: MIT
+Keywords: SR620,Time counter,Measurements
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+License-File: LICENSE.txt
+Requires-Dist: pyserial
+Requires-Dist: tqdm
