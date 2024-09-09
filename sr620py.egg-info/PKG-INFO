@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: sr620py
-Version: 0.1.0
-Summary: SR620 Universal Time Counter Python Library
-Author: Matteo Tedde (Lab3841 s.r.l.)
-Requires-Dist: pyserial
-Requires-Dist: tqdm
