@@ -40,13 +40,46 @@ device = SR620('/dev/ttyUSB0','mylogfile.log') #starts the connection
 device.close_connection()
 ```
 If no log file is specified, the output will be written on your standard console.
-### Apply a custom configuration
+> As soon as the connection is established, the current configuration of the device is read
 
 ### Start a measure
-
+To start a measure, you need to specify the type of statistics you want to read. All the statistics are saved in constants starting with `STATISTICS_`:
+```python
+device.measure(STATISTICS_MEAN) #measure the mean
+device.measure(STATISTICS_MAX) #measure the maximum
+device.measure(STATISTICS_MIN) #measure the minimum
+device.measure(STATISTICS_JITTER) #measure the jitter
+```
+```python
+res = device.measure(STATISTICS_MEAN) #measure the mean...
+print(res) #...and print the result
+```
+When a measure is started, a progress bar is shown in console. To disable it:
+```python
+device.measure(STATISTICS_MEAN,progress=False)
+```
 ### Set of measurements
+To start a set of measurements, the number of measurements and the statistics must be specified:
+```python
+res = device.start_measurement_set(STATISTICS_JITTER,10) #measure a set of 10 jitters...
 
+for num in res:
+    print(num) #...and print the result
+```
+To save the result in **csv file**, the csv file path must be specified:
+```python
+device.start_measurement_set(STATISTICS_JITTER,10,file_path='mycsv.csv') #save the result in a csv file
+```
+To start an **undefinite set of measurements**:
+```python
+res = device.start_measurement_set_forever(STATISTICS_MEAN,file_path='mycsv.csv')
+print(res)
+```
+To block the measurement set, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Allan Variance
+
+### Apply a custom configuration
+
 Dillinger is currently extended with the following plugins.
 Instructions on how to use them in your own application are linked below.
 
