@@ -3,13 +3,13 @@ from setuptools import setup, find_packages
 setup(
   name = 'sr620py',         # How you named your package folder (MyLib)
   packages = find_packages(),   # Chose the same as "name"
-  version = '0.5',      # Start with a small number and increase it with every change you make
+  version = '0.6',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Manage a SR620 Universal Time Counter',   # Give a short description about your library
   author = 'Matteo Tedde (Lab3841)',                   # Type in your name
   author_email = 'teddematteo03@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/teddematteo/sr620py',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/teddematteo/sr620py/archive/refs/tags/v_04.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/teddematteo/sr620py/archive/refs/tags/v_05.tar.gz',    # I explain this later on
   keywords = ['SR620', 'Time counter', 'Measurements'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'pyserial',
