@@ -27,12 +27,12 @@ def get_bit(x, i):
     return bit
 
 def progress(tot,p,dev):
-    logging.debug('Start measuring...')
+    #logging.debug('Start measuring...')
     for j in tqdm(range(tot)):
         time.sleep(p)
         if (not dev.cont):
             break
-    logging.debug('Measurement completed!...')
+    #logging.debug('Measurement completed!...')
 
 def start_progress(tot,p,dev):
     threadpr = threading.Thread(target=progress, args=(tot,p,dev))

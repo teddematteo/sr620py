@@ -1,8 +1,6 @@
 '''
 Unofficial library to manage a SR620 Universal Time Counter (Stanford Research Systems)
 
-@version: v001
-
 @requires: pip install pyserial,tqdm
 
 @author: Matteo Tedde (Lab3841 s.r.l.)
@@ -38,19 +36,26 @@ class SR620():
         :param serial_port_path (str): path of the serial port on which the device is connected (i.e. "/dev/ttyUSB0")
         :param log_file (str): path to the log file. If nothing is specified, then the output will be the console
         """
-        self.cont = True
-        logging.basicConfig(filename=log_file,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-        self.ser = serial.Serial(serial_port_path,9600,timeout=None)
-        self.__execute_command__("STOP;AUTM0;",False)
-        logging.debug('Connection established...')
-        self.retrieve_parameters()
+        try:
+            self.cont = True
+            logging.basicConfig(filename=log_file,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+            self.ser = serial.Serial(serial_port_path,9600,timeout=None)
+            self.__execute_command__("STOP;AUTM0;",False)
+            logging.debug('Connection established...')
+            self.__retrieve_parameters__()
+        except:
+            self.cont = False
+            logging.error('Error in opening the connection')
+            raise #program terminated
             
     def close_connection(self):
         """
         Close the serial port connection.
         """
-        logging.debug('...Connection expired!')
-        self.ser.close()
+        try:
+            self.ser.close()
+        finally:
+            logging.debug('...Connection expired!')
         
     def __execute_command__(self,command:str,needs_response:bool):
         """
@@ -83,7 +88,7 @@ class SR620():
             
         
             
-    def generate_configuration_string(self) -> str:
+    def __generate_configuration_string__(self) -> str:
         """
         Generate a command string containing the configuration of the device, according to the values set by the user.
         Parameters:
@@ -92,22 +97,22 @@ class SR620():
         try:
             cmm = f"SRCE {self.SOURCE_DICT[self.source]}; MODE {self.MODE_DICT[self.mode]}; ARMM {self.ARMM_DICT[self.armm]}; SIZE {self.size}; JTTR {self.JTTR_DICT[self.jttr]}; CLCK {self.CLCK_DICT[self.clock]}; CLKF {self.CLKF_DICT[self.clockfr]};"
             return cmm
-        except BaseException:
+        except:
             self.cont = False
             logging.error("One (or more) of the parameters does not exist! The execution has been concluded... please, check the documentation!")
             raise SR620ValueException()
 
-    def apply_custom_configuration(self,*,print=True):
+    def __apply_custom_configuration__(self,*,print=True):
         """
         Apply the configuration chosen by the user. First of all a command string is generated, and then is executed on the device. Finally, the new configuration is retrieved directly from the device.
         Parameters:
         :param print (bool): when it is set on True, a feedback string is printed
         """
-        gcs = self.generate_configuration_string()
+        gcs = self.__generate_configuration_string__()
         self.__execute_command__(gcs,False)
         if print: logging.debug('Setting parameters...')
         time.sleep(self.DELAY_CONF)
-        self.retrieve_parameters()
+        self.__retrieve_parameters__()
 
     def set_custom_configuration(self,*,mode=None,source=None,jitter=None,arming=None,size=None,clock=None,clock_frequency=None,print=False):
         """
@@ -135,10 +140,10 @@ class SR620():
                     raise SR620SizeException(self.SIZE_LIST)
                 else:
                     self.size = size
-            self.apply_custom_configuration(print=print)
+            self.__apply_custom_configuration__(print=print)
             if print: logging.info("Current configuration:\n"+str(self))
         except:
-            logging.error("Configuration set terminated")
+            logging.error("Configuration set terminated with an error")
             
     def set_mode(self,mode:str,*,print=False):
         """
@@ -203,7 +208,7 @@ class SR620():
         """
         self.set_custom_configuration(clockfr=clockfr,print=print)
 
-    def retrieve_parameters(self):
+    def __retrieve_parameters__(self):
         """
         Retrieve the parameters set on the device, saving them in the corresponding attributes of the class.
         """
@@ -236,12 +241,13 @@ class SR620():
             thread = None
             if (progress and self.armm in self.ARMM_TIME.keys() and self.mode=='freq'):        
                 thread = start_progress(int(self.size),self.ARMM_TIME[self.armm],self)
-            res = self.__execute_command__(f'STOP; AUTM 0; MEAS? {self.STAT_DICT[stat]}',True)
+            res = self.__execute_command__(f'STOP;AUTM0;MEAS?{self.STAT_DICT[stat]}',True)
             if (thread!=None):
                 thread.join()
             return float(res['value_0'])
         except:
             logging.error('Measure terminated')
+            return None #program not terminated
     
     def start_measurement_set(self,stat:str,num_meas:int,*,file_path=None,print=True,progress=False) -> list:
         """
@@ -262,13 +268,15 @@ class SR620():
                 fout.write(f'timestamp,{stat}\n')
                 fout.flush()
             for i in range(num_meas):
-                res = self.measure(stat,progress=progress)
-                lst.append(res)
-                rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
-                if print: logging.debug(f'Value read: {res}')
-                if fout!=None:
-                    fout.write(rec+'\n')
-                    fout.flush()
+                if self.cont:
+                    res = self.measure(stat,progress=progress)
+                    if res is not None:
+                        lst.append(res)
+                        rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
+                        if print: logging.debug(f'Value read: {res}')
+                        if fout!=None:
+                            fout.write(rec+'\n')
+                            fout.flush()
             if fout!=None:
                 fout.close()
                 if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
@@ -294,16 +302,14 @@ class SR620():
                 fout.write(f'timestamp,{stat}\n')
                 fout.flush()
             while self.cont:
-                try:
-                    res = self.measure(stat,progress=progress)
+                res = self.measure(stat,progress=progress)
+                if res is not None:
                     lst.append(res)
                     rec = f"{str(datetime.now(ZoneInfo('Europe/Rome')))},{res}"
                     if print: logging.debug(f'Value read: {res}')
                     if fout!=None:
                         fout.write(rec+'\n')
                         fout.flush()
-                except KeyboardInterrupt:
-                    break
             if fout!=None:
                 fout.close()
                 if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
@@ -323,13 +329,13 @@ class SR620():
         thread = None
         dct = {}
         try:
-            if (progress):        
-                thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm],self)
             self.set_custom_configuration(
                 mode='freq',
                 jitter='ALL',
                 print=False
             )
+            if (progress):        
+                thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm],self)
             fout = None
             if file_path!=None:
                 fout = open(file_path,'w')
@@ -339,11 +345,12 @@ class SR620():
                 if self.cont:
                     self.set_number_samples(int(float(f'1e{i}')),print=False)
                     res = self.measure('jitter',progress=False)
-                    dct[float(f'1e{i}')] = res
-                    rec = f"1e{i},{res}"
-                    if fout!=None:
-                        fout.write(rec+'\n')
-                        fout.flush()
+                    if res is not None:
+                        dct[float(f'1e{i}')] = res
+                        rec = f"1e{i},{res}"
+                        if fout!=None:
+                            fout.write(rec+'\n')
+                            fout.flush()
             if fout!=None: 
                 fout.close()
                 if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
