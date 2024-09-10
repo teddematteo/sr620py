@@ -7,19 +7,19 @@
        width="150" />
 </a>
 
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
-SR620PY is a python library designed to perform measurements and apply custom configurations to a SR620 Universal Time Counter (Stanford Research Systems).
+
+**SR620PY** is a python library designed to perform **measurements** and apply custom **configurations** to a SR620 Universal Time Counter (produced by Stanford Research Systems).
 
 ## Features
 
-- Remotely apply a configuration to your SR620
-- Start a measure or a set of measurements
-- Start an Allan Variance set of measurements
+- Remotely apply a **configuration** to your SR620
+- Start a **measure** or a **set of measurements**
+- Start an **Allan Variance** set of measurements
 
 ## Installation
 
-To use the library, install it by using `pip` command
+To use the library, install it by using `pip` command:
 ```sh
 pip install sr620py
 ```
@@ -43,7 +43,7 @@ If no log file is specified, the output will be written on your standard console
 > As soon as the connection is established, the current configuration of the device is read
 
 ### Start a measure
-To start a measure, you need to specify the type of statistics you want to read. All the statistics are saved in constants starting with `STATISTICS_`:
+To **start a measure**, you need to specify the type of statistics you want to read. All the **statistics** are saved in constants starting with `STATISTICS_`:
 ```python
 device.measure(STATISTICS_MEAN) #measure the mean
 device.measure(STATISTICS_MAX) #measure the maximum
@@ -59,7 +59,7 @@ When a measure is started, a progress bar is shown in console. To disable it:
 device.measure(STATISTICS_MEAN,progress=False)
 ```
 ### Set of measurements
-To start a set of measurements, the number of measurements and the statistics must be specified:
+To start a **set of measurements**, the **number** of measurements and the statistics must be specified:
 ```python
 res = device.start_measurement_set(STATISTICS_JITTER,10) #measure a set of 10 jitters...
 
@@ -77,20 +77,20 @@ print(res)
 ```
 To block the measurement set, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Allan Variance
-sr620py allows to start the measure of the Allan Variance of a signal over different number of samples (10,100,1000,...). The result is saved in a dictionary with this format:
-`{10:value0,100:value1,1000:value2,...}`
-To start the measurement of an Allan Variance set, the number of powers of ten must be specified:
+sr620py allows to start the measure of the **Allan Variance of a signal** over different number of samples (10,100,1000,...). The result is saved in a **dictionary** with this format:
+`{10:value0,100:value1,1000:value2,...}`.
+To **start the measurement** of an Allan Variance set, the **number of powers** of ten must be specified:
 ```python
 dct = device.start_measurement_allan_variance(3) #measure the Allan Variance for 10,100,1000 number of samples...
 print(dct) #...and print the result
 ```
-Also in this case the result can be saved in a csv file:
+Also in this case the result can be saved in a **csv file**:
 ```python
 dct = device.start_measurement_allan_variance(3,file_path='mycsv.csv')
 ```
 To block the measurement set before the end, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Apply a custom configuration
-sr620py finally allows to apply a custom configuration to the device. The complete command to apply the configuration is:
+sr620py finally allows to **apply a custom configuration** to the device. The complete command to apply the configuration is:
 ```python
 device.set_custom_configuration(
     mode=MODE_FREQUENCY,
@@ -104,18 +104,18 @@ device.set_custom_configuration(
 ```
 The available options are contained in constants starting with: `MODE_`,`SOURCE_`,`JITTER_`,`ARMING_`,`CLOCK_`,`CLOCK_FREQUENCY_`. The size must be one of the following values: `1,2,5,1e1,2e1,5e1,1e2,2e2,5e2,1e3,2e3,5e3,1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6`.
 
-The user can obviously specify only the options in which is interested in:
+The user can obviously specify **only the options in which is interested in**:
 ```python
 device.set_custom_configuration(
     mode=MODE_COUNT,
     source=SOURCE_B,
 ) #only change the mode and the source
 ```
-A set of methods can also be used in order to change the configuration:
+Other methods can also be used in order to **change option singularly**:
 ```python
-device.set_mode(MODE_FREQUENCY)
-device.set_clock_frequency(CLOCK_FREQUENCY_10_MEGAHZ)
-device.set_number_samples(100)
+device.set_mode(MODE_FREQUENCY) #set mode
+device.set_clock_frequency(CLOCK_FREQUENCY_10_MEGAHZ) #set clock frequency
+device.set_number_samples(100) #set number of samples
 ```
 > Attention: when a configuration is sent to the device, it's possible that is not actually applied. To check the current configuration, the print option must me added to the methods:
 
