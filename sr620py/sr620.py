@@ -206,7 +206,7 @@ class SR620():
         :param clockfr (str): string representing the frequency of the clock. Options: CLOCK_FREQUENCY_10_MEGAHZ,CLOCK_FREQUENCY_5_MEGAHZ
         :param print (bool): when it is set on True, a feedback string is printed
         """
-        self.set_custom_configuration(clockfr=clockfr,print=print)
+        self.set_custom_configuration(clock_frequency=clockfr,print=print)
 
     def __retrieve_parameters__(self):
         """
