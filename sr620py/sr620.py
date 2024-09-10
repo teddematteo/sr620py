@@ -343,11 +343,12 @@ class SR620():
                 fout.flush()
             for i in range(1,num_powers+1):
                 if self.cont:
+                    ns = float(f'1e{i}')/self.ARMM_TIME[self.armm]
                     self.set_number_samples(int(float(f'1e{i}')),print=False)
                     res = self.measure('jitter',progress=False)
                     if res is not None:
-                        dct[float(f'1e{i}')] = res
-                        rec = f"1e{i},{res}"
+                        dct[ns] = res
+                        rec = f"{ns},{res}"
                         if fout!=None:
                             fout.write(rec+'\n')
                             fout.flush()
