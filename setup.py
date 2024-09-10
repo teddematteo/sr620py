@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'sr620py',         # How you named your package folder (MyLib)
   packages = ['sr620py'],   # Chose the same as "name"
-  version = '0.2',      # Start with a small number and increase it with every change you make
+  version = '0.3',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Manage a SR620 Universal Time Counter',   # Give a short description about your library
   author = 'Matteo Tedde (Lab3841)',                   # Type in your name
