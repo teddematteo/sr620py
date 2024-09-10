@@ -1,4 +1,4 @@
-from sr620exceptions import *
+from .sr620exceptions import *
 from tqdm import tqdm
 import threading
 import time

@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
 Name: sr620py
-Version: 0.3
+Version: 0.4
 Summary: Manage a SR620 Universal Time Counter
 Home-page: https://github.com/teddematteo/sr620py
-Download-URL: https://github.com/teddematteo/sr620py/archive/refs/tags/v_03.tar.gz
+Download-URL: https://github.com/teddematteo/sr620py/archive/refs/tags/v_04.tar.gz
 Author: Matteo Tedde (Lab3841)
 Author-email: teddematteo03@gmail.com
 License: MIT

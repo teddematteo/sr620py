@@ -8,9 +8,9 @@ Unofficial library to manage a SR620 Universal Time Counter (Stanford Research S
 @author: Matteo Tedde (Lab3841 s.r.l.)
 @contact: teddematteo03@gmail.com
 '''
-from sr620utils import *
-from sr620exceptions import *
-from sr620constants import *
+from .sr620utils import *
+from .sr620exceptions import *
+from .sr620constants import *
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import serial
