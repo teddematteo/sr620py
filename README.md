@@ -77,101 +77,73 @@ print(res)
 ```
 To block the measurement set, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Allan Variance
-
+sr620py allows to start the measure of the Allan Variance of a signal over different number of samples (10,100,1000,...). The result is saved in a dictionary with this format:
+`{10:value0,100:value1,1000:value2,...}`
+To start the measurement of an Allan Variance set, the number of powers of ten must be specified:
+```python
+dct = device.start_measurement_allan_variance(3) #measure the Allan Variance for 10,100,1000 number of samples...
+print(dct) #...and print the result
+```
+Also in this case the result can be saved in a csv file:
+```python
+dct = device.start_measurement_allan_variance(3,file_path='mycsv.csv')
+```
+To block the measurement set before the end, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Apply a custom configuration
+sr620py finally allows to apply a custom configuration to the device. The complete command to apply the configuration is:
+```python
+device.set_custom_configuration(
+    mode=MODE_FREQUENCY,
+    source=SOURCE_A,
+    jitter=JITTER_ALLAN,
+    arming=ARMING_CENTISECOND,
+    size=5,
+    clock=CLOCK_EXTERNAL,
+    clock_frequency=CLOCK_FREQUENCY_10_MEGAHZ,
+)
+```
+The available options are contained in constants starting with: `MODE_`,`SOURCE_`,`JITTER_`,`ARMING_`,`CLOCK_`,`CLOCK_FREQUENCY_`. The size must be one of the following values: `1,2,5,1e1,2e1,5e1,1e2,2e2,5e2,1e3,2e3,5e3,1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6`.
 
-Dillinger is currently extended with the following plugins.
-Instructions on how to use them in your own application are linked below.
+The user can obviously specify only the options in which is interested in:
+```python
+device.set_custom_configuration(
+    mode=MODE_COUNT,
+    source=SOURCE_B,
+) #only change the mode and the source
+```
+A set of methods can also be used in order to change the configuration:
+```python
+device.set_mode(MODE_FREQUENCY)
+device.set_clock_frequency(CLOCK_FREQUENCY_10_MEGAHZ)
+device.set_number_samples(100)
+```
+> Attention: when a configuration is sent to the device, it's possible that is not actually applied. To check the current configuration, the print option must me added to the methods:
 
-| Plugin | README |
-| ------ | ------ |
-| Dropbox | [plugins/dropbox/README.md][PlDb] |
-| GitHub | [plugins/github/README.md][PlGh] |
-| Google Drive | [plugins/googledrive/README.md][PlGd] |
-| OneDrive | [plugins/onedrive/README.md][PlOd] |
-| Medium | [plugins/medium/README.md][PlMe] |
-| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
-
-## Development
-
-Want to contribute? Great!
-
-Dillinger uses Gulp + Webpack for fast developing.
-Make a change in your file and instantaneously see your updates!
-
-Open your favorite Terminal and run these commands.
-
-First Tab:
-
-```sh
-node app
+```python
+device.set_custom_configuration(
+    ...,
+    print=True
+)
+```
+The result will be something like that:
+```
+-------------------------------------
+***SR620 parameters configuration***
+    Mode: freq
+    Source: A
+    Arming: 1s
+    NumOfSamples: 100.0
+    TypeOfJitter: STD
+    Clock: int
+    ClockFrequency: 10mhz
+-------------------------------------
 ```
 
-Second Tab:
-
-```sh
-gulp watch
-```
-
-(optional) Third:
-
-```sh
-karma test
-```
-
-#### Building for source
-
-For production release:
-
-```sh
-gulp build --prod
-```
-
-Generating pre-built zip archives for distribution:
-
-```sh
-gulp build dist --prod
-```
-
-## Docker
-
-Dillinger is very easy to install and deploy in a Docker container.
-
-By default, the Docker will expose port 8080, so change this within the
-Dockerfile if necessary. When ready, simply use the Dockerfile to
-build the image.
-
-```sh
-cd dillinger
-docker build -t <youruser>/dillinger:${package.json.version} .
-```
-
-This will create the dillinger image and pull in the necessary dependencies.
-Be sure to swap out `${package.json.version}` with the actual
-version of Dillinger.
-
-Once done, run the Docker image and map the port to whatever you wish on
-your host. In this example, we simply map port 8000 of the host to
-port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
-
-```sh
-docker run -d -p 8000:8080 --restart=always --cap-add=SYS_ADMIN --name=dillinger <youruser>/dillinger:${package.json.version}
-```
-
-> Note: `--capt-add=SYS-ADMIN` is required for PDF rendering.
-
-Verify the deployment by navigating to your server address in
-your preferred browser.
-
-```sh
-127.0.0.1:8000
-```
 
 ## License
 
-MIT
+MIT License
 
-**Free Software, Hell Yeah!**
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
