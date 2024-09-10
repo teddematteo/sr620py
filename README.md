@@ -1,7 +1,11 @@
 # SR620PY
 ## _Remotely control your SR620 Universal Time Interval Counter_
 
-[![N|Solid](https://lab3841.it/wp-content/uploads/logo.svg)](https://lab3841.it/)
+<a href="https://lab3841.it/">
+  <img src="https://lab3841.it/wp-content/uploads/logo.svg" 
+       alt="Logo" 
+       width="200" />
+</a>
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
@@ -27,7 +31,7 @@ pip install sr620py --upgrade
 ```
 
 ## How to use it
-To open a connection with yout SR620 device, the corresponding serial port and log file path must be specified:
+To **open a connection** with yout SR620 device, the corresponding **serial port** and **log file** path must be specified:
 ```python
 from sr620py import *
 
@@ -35,7 +39,7 @@ device = SR620('/dev/ttyUSB0','mylogfile.log') #starts the connection
 #...your code here...
 device.close_connection()
 ```
-If no log file is specified, then output will be written on your standard console.
+If no log file is specified, the output will be written on your standard console.
 ### Apply a custom configuration
 
 ### Start a measure
