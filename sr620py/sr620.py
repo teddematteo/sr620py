@@ -26,7 +26,7 @@ class SR620():
     SIZE_LIST = [1,2,5,1e1,2e1,5e1,1e2,2e2,5e2,1e3,2e3,5e3,1e4,2e4,5e4,1e5,2e5,5e5,1e6,2e6,5e6]
     CLKF_DICT = {'10mhz':0,'5mhz':1}
     STAT_DICT = {'mean':0,'jitter':1,'max':2,'min':3}
-    ARMM_TIME = {'1cs':0.01,'1ds':0.1,'1s':1,'ext1cs':0.01,'ext1ds':0.1,'ext1s':1,'1per':0.0000001}
+    ARMM_TIME = {'1cs':0.01,'1ds':0.1,'1s':1,'ext1cs':0.01,'ext1ds':0.1,'ext1s':1,'1per':0.001}
     DELAY_CONF = 1
 
     def __init__(self,serial_port_path:str,log_file=None):
