@@ -8,7 +8,7 @@
 </a>
 
 
-
+---
 **SR620PY** is a python library designed to perform **measurements** and apply custom **configurations** to a SR620 Universal Time Counter (produced by Stanford Research Systems).
 
 ## Features
