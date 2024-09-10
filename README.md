@@ -4,7 +4,7 @@
 <a href="https://lab3841.it/">
   <img src="https://lab3841.it/wp-content/uploads/logo.svg" 
        alt="Logo" 
-       width="200" />
+       width="150" />
 </a>
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
