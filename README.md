@@ -23,7 +23,7 @@ To use the library, install it by using `pip` command:
 ```sh
 pip install sr620py
 ```
-`sr620py` requires `pyserial` and `tqdm` to work properly.
+`sr620py` requires `pyserial`, `tqdm`, `numpy`, `matplotlib` and `allantools` to work properly.
 
 To upgrade the library:
 ```sh
