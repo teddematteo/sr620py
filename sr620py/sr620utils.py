@@ -1,4 +1,6 @@
 from .sr620exceptions import *
+import matplotlib
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 import threading
 import time
@@ -28,7 +30,7 @@ def get_bit(x, i):
 
 def progress(tot,p,dev):
     #logging.debug('Start measuring...')
-    for j in tqdm(range(tot)):
+    for j in tqdm(range(int(tot+tot*0.1))):
         time.sleep(p)
         if (not dev.cont):
             break
@@ -44,6 +46,19 @@ def tot_allan_time(p):
     for i in range(1,p+1):
         tot = tot+int(float(f'1e{i}'))
     return tot
+
+def save_plot(a,path):
+    matplotlib.set_loglevel("warning")
+    plt.figure(figsize=(8,6))
+    plt.errorbar(a.out['taus'], a.out['stat'], yerr=a.out['stat_err'], marker='o', linestyle='-', color='b')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Tau (s)')
+    plt.ylabel('Allan Variance')
+    plt.title('Allan Variance vs Averaging Time')
+    plt.grid(True, which="both", ls="--")
+    plt.savefig(path)
+    plt.clf()
 
 # def get_log_file_path():
 #     for handler in logging.getLogger().handlers:

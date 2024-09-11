@@ -11,6 +11,8 @@ from .sr620exceptions import *
 from .sr620constants import *
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import numpy as np
+import allantools
 import serial
 import time
 import logging
@@ -235,7 +237,7 @@ class SR620():
         Start a new measurement of the specified statistics on the device.
         Parameters:
         :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
-        :param progress (bool): when it is set on True, a progress bar is showed on the console
+        :param progress (bool): when it is set on True, a progress bar is shown on the console
         """
         try:
             thread = None
@@ -256,7 +258,7 @@ class SR620():
         :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
         :param num_meas (int): number of measurements to perform
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
-        :param progress (bool): when it is set on True, a progress bar is showed on the console
+        :param progress (bool): when it is set on True, a progress bar is shown on the console
         :return (list): list of float values corresponding to the measurements
         """
         if print: logging.debug('Measurement set started...')
@@ -290,7 +292,7 @@ class SR620():
         Parameters:
         :param stat (str): string representing the statistics to measure. Options: STATISTICS_MEAN,STATISTICS_JITTER,STATISTICS_MAX,STATISTICS_MIN
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
-        :param progress (bool): when it is set on True, a progress bar is showed on the console
+        :param progress (bool): when it is set on True, a progress bar is shown on the console
         :return (list): list of float values corresponding to the measurements
         """
         if print: logging.debug('Measurement set started...')
@@ -317,44 +319,53 @@ class SR620():
             logging.error('Measurement set terminated')
         return lst
 
-    def start_measurement_allan_variance(self,num_powers:int,*,file_path=None,progress=True) -> dict:
+    def start_measurement_allan_variance(self,n:int,*,command=ALLAN_OVERLAPPING,file_path=None,plot_path=None,progress=True,print=True) -> dict:
         """
-        Start a set of measurements corresponding to the Allan Variance for an increasing number of observations. Return a dictionary of the measurements.
+        Start a set of measurements corresponding to the Allan Variance for an increasing averaging time. Return a dictionary of the measurements.
         Parameters:
-        :param num_powers (int): number of 'powers of ten' of observations to consider (i.e. if num_powers is set to 3, then the Allan Variance will be computed on 10^1, 10^2 and 10^3)
+        :param n (int): number of measurements to perform
+        :param command (str): kind of Allan Variance to compute. Options: ALLAN_CLASSIC, ALLAN_OVERLAPPING, ALLAN_MODIFIED
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
-        :param progress (bool): when it is set on True, a progress bar is showed on the console
-        :return (dict): dictionary containing the measurements. The keys are the powers of ten, while the values are the corresponding Allan Variances
+        :param plot_path (str): if specified, the plot is saved in the corresponding output file
+        :param progress (bool): when it is set on True, a progress bar is shown on the console
+        :return (dict): dictionary containing the measurements. The keys are the averaging times, while the values are the corresponding Allan Variances
         """
         thread = None
         dct = {}
+        lst = []
         try:
-            self.set_custom_configuration(
-                mode='freq',
-                jitter='ALL',
-                print=False
-            )
             if (progress):        
-                thread = start_progress(tot_allan_time(num_powers),self.ARMM_TIME[self.armm],self)
+                thread = start_progress(n,self.ARMM_TIME[self.armm],self)
             fout = None
             if file_path!=None:
                 fout = open(file_path,'w')
-                fout.write(f'number of observations,allan variance\n')
+                fout.write(f'averaging time,allan deviation\n')
                 fout.flush()
-            for i in range(1,num_powers+1):
+            self.set_number_samples(1)
+            for i in range(n):
                 if self.cont:
-                    ns = float(f'1e{i}')/self.ARMM_TIME[self.armm]
-                    self.set_number_samples(int(float(f'1e{i}')),print=False)
-                    res = self.measure('jitter',progress=False)
+                    res = self.measure(STATISTICS_MEAN,progress=False)
                     if res is not None:
-                        dct[ns] = res
-                        rec = f"{ns},{res}"
-                        if fout!=None:
-                            fout.write(rec+'\n')
-                            fout.flush()
-            if fout!=None: 
+                        lst.append(res)
+            
+            a = allantools.Dataset(data=lst,rate=1/self.ARMM_TIME[self.armm])
+            a.compute(command) #compute allan variance
+
+            for i in range(len(a.out['taus'])):
+                dct[float(a.out['taus'][i])] = float(a.out['stat'][i])
+                if fout!=None:
+                    rec = f"{float(a.out['taus'][i])},{float(a.out['stat'][i])}"
+                    fout.write(rec+'\n')
+                    fout.flush()
+
+            if fout!=None:
                 fout.close()
                 if print: logging.debug(f'Measurement set concluded, file saved in {file_path}')
+
+            if plot_path!=None:
+                save_plot(a,plot_path)
+                if print: logging.debug(f'Plot created, file saved in {plot_path}')
+
         except:
             logging.error('Measurement set terminated')
         return dct
