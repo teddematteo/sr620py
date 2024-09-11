@@ -98,10 +98,7 @@ And also the corresponding **plot** can be saved:
 dct = device.start_measurement_allan_variance(3000,plot_path='myplot.png')
 ```
 
-<a href="https://lab3841.it/">
-  <img src="./tests/allan.png"  
-       width="150" />
-</a>
+<img src="./tests/allan.png"  width="300" />
 
 To block the measurement set before the end, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Apply a custom configuration
