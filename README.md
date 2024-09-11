@@ -97,6 +97,12 @@ And also the corresponding **plot** can be saved:
 ```python
 dct = device.start_measurement_allan_variance(3000,plot_path='myplot.png')
 ```
+
+<a href="https://lab3841.it/">
+  <img src="./tests/allan.png"  
+       width="150" />
+</a>
+
 To block the measurement set before the end, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Apply a custom configuration
 sr620py finally allows to **apply a custom configuration** to the device. The complete command to apply the configuration is:
