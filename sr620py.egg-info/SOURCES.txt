@@ -12,3 +12,4 @@ sr620py.egg-info/SOURCES.txt
 sr620py.egg-info/dependency_links.txt
 sr620py.egg-info/requires.txt
 sr620py.egg-info/top_level.txt
+tests/test.py
