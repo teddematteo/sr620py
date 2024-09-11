@@ -77,16 +77,25 @@ print(res)
 ```
 To block the measurement set, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Allan Variance
-sr620py allows to start the measure of the **Allan Variance of a signal** over different number of samples (10,100,1000,...). The result is saved in a **dictionary** with this format:
+sr620py allows to start the measure of the **Allan Variance of a signal** over different number of averaging times (10,100,1000,...). The result is saved in a **dictionary** with this format:
 `{10:value0,100:value1,1000:value2,...}`.
-To **start the measurement** of an Allan Variance set, the **number of powers** of ten must be specified:
+To **start the measurement** of an Allan Variance set, the **number of measurements to perform** must be specified:
 ```python
-dct = device.start_measurement_allan_variance(3) #measure the Allan Variance for 10,100,1000 number of samples...
+dct = device.start_measurement_allan_variance(3000) #take 3000 measurements and compute Allan Variance over different averaging times (powers of 2 up to 3000)...
 print(dct) #...and print the result
 ```
-Also in this case the result can be saved in a **csv file**:
+The default Allan Variance computed is the **Overlapping Allan Variance**. To change it, the `command` parameter must be set to one of the following constants: `ALLAN_CLASSIC`,`ALLAN_OVERLAPPING`,`ALLAN_MODIFIED`, which correspond to the Classical Allan Variance, the Overlapping Allan Variance and the Modified Allan Variance
 ```python
-dct = device.start_measurement_allan_variance(3,file_path='mycsv.csv')
+dct = device.start_measurement_allan_variance(3000,command=ALLAN_MODIFIED)
+```
+
+The result can be saved in a **csv file**:
+```python
+dct = device.start_measurement_allan_variance(3000,file_path='mycsv.csv')
+```
+And also the corresponding **plot** can be saved:
+```python
+dct = device.start_measurement_allan_variance(3000,plot_path='myplot.png')
 ```
 To block the measurement set before the end, a Keyboard Interrupt `CTRL+C` command must be sent.
 ### Apply a custom configuration
