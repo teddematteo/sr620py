@@ -9,5 +9,5 @@ device.set_custom_configuration(
     clock=CLOCK_EXTERNAL,
     print=True
 )
-device.start_measurement_allan_variance(6,file_path='allan.csv')
+device.start_measurement_allan_variance(10,file_path='allan.csv',plot_path='allan.png')
 device.close_connection()
