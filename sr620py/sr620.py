@@ -319,11 +319,12 @@ class SR620():
             logging.error('Measurement set terminated')
         return lst
 
-    def start_measurement_allan_variance(self,n:int,*,command=ALLAN_OVERLAPPING,file_path=None,plot_path=None,progress=True,print=True) -> dict:
+    def start_measurement_allan_variance(self,n:int,*,f_0=None,command=ALLAN_OVERLAPPING,file_path=None,plot_path=None,progress=True,print=True) -> dict:
         """
         Start a set of measurements corresponding to the Allan Variance for an increasing averaging time. Return a dictionary of the measurements.
         Parameters:
         :param n (int): number of measurements to perform
+        :param f_0 (int): nominal frequency. If no value is given, the nominal frequency will be the mean of the measurements
         :param command (str): kind of Allan Variance to compute. Options: ALLAN_CLASSIC, ALLAN_OVERLAPPING, ALLAN_MODIFIED
         :param file_path (str): if specified, the set of measurements is saved in the corresponding output file
         :param plot_path (str): if specified, the plot is saved in the corresponding output file
@@ -345,11 +346,19 @@ class SR620():
                 mode=MODE_FREQUENCY,
                 size=1
             )
+
             for i in range(n):
                 if self.cont:
                     res = self.measure(STATISTICS_MEAN,progress=False)
                     if res is not None:
+                        if f_0 is not None:
+                            res = (res-f_0)/f_0
                         lst.append(res)
+
+            if f_0 is None: #if no nominal frequency is given, we use the mean of the measurements
+                mean = sum(res)/len(res)
+                for i in range(len(res)):
+                    res[i] = (res[i]-mean)/mean
             
             a = allantools.Dataset(data=lst,rate=1/self.ARMM_TIME[self.armm],data_type='freq')
             a.compute(command) #compute allan variance
