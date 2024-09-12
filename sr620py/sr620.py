@@ -356,9 +356,9 @@ class SR620():
                         lst.append(res)
 
             if f_0 is None: #if no nominal frequency is given, we use the mean of the measurements
-                mean = sum(res)/len(res)
-                for i in range(len(res)):
-                    res[i] = (res[i]-mean)/mean
+                mean = sum(lst)/len(lst)
+                for i in range(len(lst)):
+                    lst[i] = (lst[i]-mean)/mean
             
             a = allantools.Dataset(data=lst,rate=1/self.ARMM_TIME[self.armm],data_type='freq')
             a.compute(command) #compute allan variance
