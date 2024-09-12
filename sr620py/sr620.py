@@ -341,14 +341,17 @@ class SR620():
                 fout = open(file_path,'w')
                 fout.write(f'averaging time,allan deviation\n')
                 fout.flush()
-            self.set_number_samples(1)
+            self.set_custom_configuration( #mode set to frequency and size set to 1
+                mode=MODE_FREQUENCY,
+                size=1
+            )
             for i in range(n):
                 if self.cont:
                     res = self.measure(STATISTICS_MEAN,progress=False)
                     if res is not None:
                         lst.append(res)
             
-            a = allantools.Dataset(data=lst,rate=1/self.ARMM_TIME[self.armm])
+            a = allantools.Dataset(data=lst,rate=1/self.ARMM_TIME[self.armm],data_type='freq')
             a.compute(command) #compute allan variance
 
             for i in range(len(a.out['taus'])):
