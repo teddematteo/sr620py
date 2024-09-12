@@ -9,7 +9,7 @@ setup(
   author = 'Matteo Tedde (Lab3841)',                   # Type in your name
   author_email = 'teddematteo03@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/teddematteo/sr620py',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/teddematteo/sr620py/archive/refs/tags/v_1.4.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/teddematteo/sr620py/archive/refs/tags/v_1.5.tar.gz',    # I explain this later on
   keywords = ['SR620', 'Time counter', 'Measurements'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'pyserial',
