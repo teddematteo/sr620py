@@ -81,7 +81,8 @@ sr620py allows to start the measure of the **Allan Variance of a signal** over d
 `{10:value0,100:value1,1000:value2,...}`.
 To **start the measurement** of an Allan Variance set, the **number of measurements to perform** and the **nominal frequency** must be specified:
 ```python
-dct = device.start_measurement_allan_variance(3000) #take 3000 measurements and compute Allan Variance over different averaging times (powers of 2 up to 3000)...
+dct = device.start_measurement_allan_variance(3000,f_0=10000000)
+#take 3000 measurements and compute Allan Variance over different averaging times (powers of 2 up to 3000), with a nominal frequency of 10MHz...
 print(dct) #...and print the result
 ```
 > When the nominal frequency is not specified, it is computed as the mean of the measured values
